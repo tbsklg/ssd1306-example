@@ -81,6 +81,12 @@ pub fn FrameBuffer(
             return self.pixels[pos] & (@as(u8, 1) << @truncate(bit));
         }
 
+        fn get_packed_byte(self: *const Self, x: usize, y: usize) u8 {
+            const page = y >> 3;
+            const pos = page * width + x;
+            return self.pixels[pos];
+        }
+
         pub fn draw_bitmap(
             self: *Self,
             start_x: u7,
@@ -107,7 +113,7 @@ pub fn FrameBuffer(
     };
 }
 
-test "set pixel hbp" {
+test "set pixel with horizontal pixel packing" {
     var fb: FrameBuffer(128, 64, .horizontal) = .{};
 
     fb.set_pixel(0, 0);
@@ -118,6 +124,52 @@ test "set pixel hbp" {
     const p2 = fb.get_pixel(1, 0);
     try std.testing.expectEqual(0b01000000, p2);
 
-    // const b1 = fb.getBox(0, 0);
-    // try std.testing.expectEqual(0b11000000, b1);
+    const b1 = fb.get_packed_byte(0, 0);
+    try std.testing.expectEqual(0b11000000, b1);
+}
+
+test "set pixel with vertical pixel packing" {
+    var fb: FrameBuffer(128, 64, .vertical) = .{};
+
+    fb.set_pixel(0, 0);
+    const p1 = fb.get_pixel(0, 0);
+    try std.testing.expectEqual(0b00000001, p1);
+
+    fb.set_pixel(0, 1);
+    const p2 = fb.get_pixel(0, 1);
+    try std.testing.expectEqual(0b00000010, p2);
+
+    const b1 = fb.get_packed_byte(0, 0);
+    try std.testing.expectEqual(0b00000011, b1);
+}
+
+test "draw bitmap for vertical framebuffer" {
+    var fb: FrameBuffer(24, 24, .vertical) = .{};
+
+    const bm = [_]u8{
+        0b11111111, 0b11111111, 0b11111111,
+        0b11111111, 0b00000000, 0b11111111,
+        0b11111111, 0b11111111, 0b11111111,
+    };
+
+    fb.draw_bitmap(0, 0, 24, 3, &bm);
+
+    try std.testing.expectEqual(fb.get_packed_byte(0, 0), 0b00000111);
+    try std.testing.expectEqual(fb.get_packed_byte(8, 0), 0b00000101);
+    try std.testing.expectEqual(fb.get_packed_byte(9, 0), 0b00000101);
+}
+
+test "draw bitmap for horizontal framebuffer" {
+    var fb: FrameBuffer(24, 24, .horizontal) = .{};
+
+    const bm = [_]u8{
+        0b11111111, 0b11111111, 0b11111111,
+        0b11111111, 0b00000000, 0b11111111,
+        0b11111111, 0b11111111, 0b11111111,
+    };
+
+    fb.draw_bitmap(0, 0, 24, 3, &bm);
+
+    try std.testing.expectEqual(fb.get_packed_byte(0, 0), 0b11111111);
+    try std.testing.expectEqual(fb.get_packed_byte(8, 1), 0b11111111);
 }
