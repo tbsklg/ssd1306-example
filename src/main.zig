@@ -63,19 +63,6 @@ pub fn main() !void {
 
     std.log.info("framebuffer written successfully", .{});
 
-    var times: usize = 0;
-
-    var mode: microzig.drivers.display.ssd1306.NormalOrInverseDisplay = .normal;
-    while (true) {
-        if (times == 55) break;
-
-        try display.set_normal_or_inverse_display(mode);
-        if (mode == .normal) mode = .inverse else mode = .normal;
-
-        time.sleep_ms(50);
-        times += 1;
-    }
-
     std.log.debug("entering blink loop", .{});
     blink(pins);
 }

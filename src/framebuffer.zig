@@ -99,6 +99,9 @@ pub fn FrameBuffer(
 
             for (0..bm_height) |y| {
                 for (0..bm_width) |x| {
+                    if (start_x + x >= bm_width) continue;
+                    if (start_y + y >= bm_height) continue;
+
                     const byte_index = y * bytes_per_row + (x >> 3);
                     const bit_index = x & 7;
                     const mask = @as(u8, 0x80) >> @truncate(bit_index);
@@ -154,9 +157,9 @@ test "draw bitmap for vertical framebuffer" {
 
     fb.draw_bitmap(0, 0, 24, 3, &bm);
 
-    try std.testing.expectEqual(fb.get_packed_byte(0, 0), 0b00000111);
-    try std.testing.expectEqual(fb.get_packed_byte(8, 0), 0b00000101);
-    try std.testing.expectEqual(fb.get_packed_byte(9, 0), 0b00000101);
+    try std.testing.expectEqual(0b00000111, fb.get_packed_byte(0, 0));
+    try std.testing.expectEqual(0b00000101, fb.get_packed_byte(8, 0));
+    try std.testing.expectEqual(0b00000101, fb.get_packed_byte(9, 0));
 }
 
 test "draw bitmap for horizontal framebuffer" {
@@ -170,6 +173,45 @@ test "draw bitmap for horizontal framebuffer" {
 
     fb.draw_bitmap(0, 0, 24, 3, &bm);
 
-    try std.testing.expectEqual(fb.get_packed_byte(0, 0), 0b11111111);
-    try std.testing.expectEqual(fb.get_packed_byte(8, 1), 0b11111111);
+    try std.testing.expectEqual(0b11111111, fb.get_packed_byte(0, 0));
+    try std.testing.expectEqual(0b11111111, fb.get_packed_byte(8, 1));
+}
+
+test "draw horizontal bitmap clips at right edge" {
+    var fb: FrameBuffer(24, 24, .horizontal) = .{};
+
+    const bm = [_]u8{
+        0b11111111, 0b11111111, 0b11111111,
+        0b11111111, 0b00000000, 0b11111111,
+        0b11111111, 0b11111111, 0b11111111,
+    };
+
+    fb.draw_bitmap(8, 0, 24, 3, &bm);
+
+    try std.testing.expectEqual(0b00000000, fb.get_packed_byte(0, 0));
+    try std.testing.expectEqual(0b00000000, fb.get_packed_byte(0, 1));
+    try std.testing.expectEqual(0b00000000, fb.get_packed_byte(0, 2));
+    try std.testing.expectEqual(0b11111111, fb.get_packed_byte(8, 1));
+}
+
+test "draw vertical bitmap clips at right edge" {
+    var fb: FrameBuffer(24, 24, .vertical) = .{};
+
+    const bm = [_]u8{
+        0b11111111, 0b11111111, 0b11111111,
+        0b11111111, 0b00000000, 0b11111111,
+        0b11111111, 0b11111111, 0b11111111,
+    };
+
+    fb.draw_bitmap(8, 0, 24, 3, &bm);
+
+    try std.testing.expectEqual(0b00000000, fb.get_packed_byte(0, 8));
+    try std.testing.expectEqual(
+        0b00000111,
+        fb.get_packed_byte(8, 0),
+    );
+    try std.testing.expectEqual(
+        0b00000101,
+        fb.get_packed_byte(16, 0),
+    );
 }
