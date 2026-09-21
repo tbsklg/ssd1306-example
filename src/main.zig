@@ -60,7 +60,6 @@ pub fn main() !void {
         std.log.err("failed to write framebuffer: {s}", .{@errorName(e)});
         return;
     };
-
     std.log.info("framebuffer written successfully", .{});
 
     std.log.debug("entering blink loop", .{});

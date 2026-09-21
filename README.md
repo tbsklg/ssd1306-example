@@ -10,6 +10,8 @@ I also included my own `FrameBuffer` implementation, which I used to learn how t
 There are two common ways to pack 1-bit pixels into bytes: horizontal bit packing and vertical bit packing. The SSD1306 uses vertical bit packing, where one byte represents 8 vertical pixels within a page. 
 My `FrameBuffer` implementation supports both, but it is mainly included for learing purposes.
 
+![SSD1306 OLED Display Ziggy](images/ziggy.jpg)
+
 ## Hardware
 
 - Breadboard
@@ -18,7 +20,7 @@ My `FrameBuffer` implementation supports both, but it is mainly included for lea
 
 ### Wiring
 
-- OLED SDA -> GPIO19
+- OLED SDA -> GPIO19
 - OLED SCL -> GPIO20
 - OLED VCC -> 3V3
 - OLED Gnd -> Gnd
