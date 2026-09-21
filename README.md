@@ -10,7 +10,7 @@ I also included my own `FrameBuffer` implementation, which I used to learn how t
 There are two common ways to pack 1-bit pixels into bytes: horizontal bit packing and vertical bit packing. The SSD1306 uses vertical bit packing, where one byte represents 8 vertical pixels within a page. 
 My `FrameBuffer` implementation supports both, but it is mainly included for learing purposes.
 
-<img src="./images/ziggy.jpg" alt="ziggy" width="200"/>
+<img src="./images/ziggy.jpg" alt="ziggy" width="400"/>
 
 ## Hardware
 
